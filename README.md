@@ -25,6 +25,7 @@ problem or a need to irrigate — and says so honestly when the evidence is too 
 | Try the sensor-fusion idea yourself | [`website/fusion.html`](website/fusion.html) |
 | See the ESP32 firmware simulation (Wokwi): circuit, 15 tested scenarios, how to run it | [`website/wokwi.html`](website/wokwi.html) |
 | Read the full technical walkthrough | [`project/PROJECT_EXPLAINED.md`](project/PROJECT_EXPLAINED.md) |
+| Get every verified fact in one place (for slides, scripts, Q&A prep) | [`PROJECT_MASTER.md`](PROJECT_MASTER.md) |
 | Run the code | [How to run](#how-to-run) below |
 
 ---
