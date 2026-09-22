@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KisanNetra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,500;0,600;1,500&display=swap">
+<style>
+:root{
+  --ground:#F3F6F3; --surface:#FFFFFF; --surface-2:#EAF0EC; --sunk:#DFE7E2;
+  --ink:#15201B; --ink-2:#3C4D46; --muted:#667A72; --rule:#D2DCD6;
+  --accent:#1B6A5A; --accent-2:#2F8A74; --accent-soft:#DAEBE5;
+  --ok:#3D7B38; --ok-bg:#E5EFE2;
+  --warn:#93600F; --warn-bg:#F6EBD6;
+  --track:#E4EBE7;
+  --shadow:0 1px 2px rgba(21,32,27,.06),0 10px 26px -16px rgba(21,32,27,.25);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1412; --surface:#141D1A; --surface-2:#1A2622; --sunk:#1B2521;
+    --ink:#E2EAE6; --ink-2:#AEBFB8; --muted:#7C9089; --rule:#27352F;
+    --accent:#5CC2A9; --accent-2:#4BA891; --accent-soft:#11302A;
+    --ok:#6DBE62; --ok-bg:#162D18;
+    --warn:#DFA640; --warn-bg:#31250E;
+    --track:#1F2B27;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -16px rgba(0,0,0,.75);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1412; --surface:#141D1A; --surface-2:#1A2622; --sunk:#1B2521;
+  --ink:#E2EAE6; --ink-2:#AEBFB8; --muted:#7C9089; --rule:#27352F;
+  --accent:#5CC2A9; --accent-2:#4BA891; --accent-soft:#11302A;
+  --ok:#6DBE62; --ok-bg:#162D18;
+  --warn:#DFA640; --warn-bg:#31250E;
+  --track:#1F2B27;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -16px rgba(0,0,0,.75);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"IBM Plex Serif",Georgia,serif;margin:0;text-wrap:balance;font-weight:600}
+h2{font-size:clamp(1.35rem,3vw,1.7rem);letter-spacing:-.01em}
+h3{font-size:1.05rem}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+.gut{padding-inline:20px}
+.inner{max-width:1080px;margin:0 auto}
+.lede{color:var(--ink-2);max-width:66ch}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:500}
+.small{font-size:.86rem;color:var(--muted)}
+
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--ground);border-bottom:1px solid var(--rule)}
+.nav .inner{display:flex;align-items:center;gap:18px;min-height:52px;overflow-x:auto;scrollbar-width:none}
+.nav .inner::-webkit-scrollbar{display:none}
+.brand{font-family:"IBM Plex Serif",serif;font-weight:600;font-size:1.02rem;white-space:nowrap;color:var(--ink);text-decoration:none}
+.nav a.l{font-size:.86rem;color:var(--ink-2);text-decoration:none;white-space:nowrap;padding:4px 0}
+.nav a.l:hover{color:var(--accent)}
+
+.hero{padding-block:44px 36px;border-bottom:1px solid var(--rule)}
+.hero .inner{display:grid;gap:30px;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:end}
+@media (max-width:860px){.hero .inner{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(2rem,5.2vw,3.25rem);line-height:1.08;letter-spacing:-.02em;margin-block:10px 16px}
+.hero h1 em{font-style:italic;font-weight:500;color:var(--accent)}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.fact{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.fact__v{font-family:"IBM Plex Mono",monospace;font-size:1.45rem;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.fact__k{font-size:.8rem;color:var(--muted);line-height:1.35}
+.idline{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:18px;font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--muted)}
+
+section{padding-block:52px 8px;scroll-margin-top:60px}
+.shead{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+
+.split{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.plain ul{margin:0;padding-left:1.15em;display:flex;flex-direction:column;gap:6px;color:var(--ink-2)}
+.plain b{color:var(--ink)}
+
+.quote{font-family:"IBM Plex Serif",serif;font-style:italic;font-size:clamp(1.3rem,3vw,1.75rem);line-height:1.3;
+  color:var(--ink);border-left:3px solid var(--accent);padding-left:18px;max-width:34ch}
+.rules{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:26px}
+.rule{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.rule p{color:var(--ink-2);font-size:.93rem}
+.rule .tag{align-self:flex-start}
+
+.tag{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 7px;border-radius:2px;white-space:nowrap;font-weight:500}
+.tag--ok{color:var(--ok);background:var(--ok-bg)}
+.tag--acc{color:var(--accent);background:var(--accent-soft)}
+.tag--mute{color:var(--muted);background:var(--surface-2)}
+
+.arch{display:grid;gap:18px;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:start}
+@media (max-width:860px){.arch{grid-template-columns:1fr}}
+.figure{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:16px;margin:0}
+.figure svg{display:block;width:100%;height:auto;max-width:100%}
+.figure figcaption{font-size:.82rem;color:var(--muted);margin-top:8px}
+.flow{display:flex;flex-direction:column}
+.tier{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.tier--edge{border-color:var(--accent);box-shadow:var(--shadow)}
+.tier__head{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.tier ul{margin:0;padding-left:1.1em;color:var(--ink-2);font-size:.92rem;display:flex;flex-direction:column;gap:3px}
+.link{display:flex;align-items:center;gap:10px;padding:8px 0 8px 22px;font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--muted)}
+.link::before{content:"";width:2px;height:26px;background:var(--rule);flex:none}
+.energy{margin-top:18px}
+
+.tscroll{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+caption{text-align:left;padding:12px 14px 0;font-size:.86rem;color:var(--muted)}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+thead th{font-family:"IBM Plex Mono",monospace;font-size:.68rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);background:var(--surface-2);white-space:nowrap}
+tbody th{font-weight:600;color:var(--ink)}
+td.n,th.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+tr.chosen td,tr.chosen th{background:var(--accent-soft)}
+
+.charts{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.card__head{display:flex;flex-direction:column;gap:4px}
+.headline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.headline__v{font-family:"IBM Plex Mono",monospace;font-size:2rem;font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.headline__ci{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--muted)}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar,.axis{display:grid;grid-template-columns:128px minmax(0,1fr) 54px;gap:10px;align-items:center}
+@media (max-width:460px){.bar,.axis{grid-template-columns:92px minmax(0,1fr) 50px}}
+.bar__k{font-size:.86rem;color:var(--ink-2);overflow-wrap:anywhere;line-height:1.25}
+.bar__t{position:relative;height:18px;background:var(--track);border-radius:2px}
+.bar__f{position:absolute;inset:0 auto 0 0;background:var(--accent-2);border-radius:0 4px 4px 0}
+.bar:hover .bar__f,.bar:focus-visible .bar__f{background:var(--accent)}
+.bar__v{font-family:"IBM Plex Mono",monospace;font-size:.84rem;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.grid-line{position:absolute;top:0;bottom:0;width:1px;background:var(--surface);opacity:.9}
+.axis__s{position:relative;height:16px;font-family:"IBM Plex Mono",monospace;font-size:.68rem;color:var(--muted)}
+.axis__s span{position:absolute;top:0;transform:translateX(-50%)}
+.axis__s span:first-child{transform:none}
+.axis__s span:last-child{transform:translateX(-100%)}
+.tip{position:absolute;z-index:20;pointer-events:none;background:var(--ink);color:var(--ground);font-size:.8rem;
+  padding:6px 9px;border-radius:3px;white-space:nowrap;box-shadow:var(--shadow)}
+.note{background:var(--surface-2);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 4px 4px 0;
+  color:var(--ink-2);font-size:.92rem;max-width:80ch}
+.note b{color:var(--ink)}
+
+.qc{display:grid;gap:18px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+@media (max-width:860px){.qc{grid-template-columns:1fr}}
+.pending{color:var(--muted);font-style:italic}
+
+.demos{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.demo{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:18px;display:flex;flex-direction:column;gap:10px;
+  text-decoration:none;color:inherit;transition:border-color .15s,box-shadow .15s}
+.demo:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.demo .tag{align-self:flex-start}
+.demo p{color:var(--ink-2);font-size:.92rem}
+.demo__go{margin-top:auto;font-weight:600;color:var(--accent);font-size:.9rem}
+
+.limit{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.limit:last-child{border-bottom:0}
+.limit__m{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--warn);text-align:center}
+.limit p{color:var(--ink-2);font-size:.93rem}
+.limit b{color:var(--ink)}
+
+.road{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.step{border-top:2px solid var(--accent);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.step p{color:var(--ink-2);font-size:.92rem}
+
+footer{margin-top:56px;border-top:1px solid var(--rule);padding-block:22px 40px}
+footer .inner{display:flex;flex-direction:column;gap:6px;font-size:.84rem;color:var(--muted)}
+</style>
+
+<nav class="nav gut" aria-label="Sections">
+  <div class="inner">
+    <a class="brand" href="#top">KisanNetra</a>
+    <a class="l" href="#problem">Problem</a>
+    <a class="l" href="#idea">Idea</a>
+    <a class="l" href="#system">System</a>
+    <a class="l" href="#results">Results</a>
+    <a class="l" href="#qualcomm">Qualcomm edge</a>
+    <a class="l" href="#demos">Live pages</a>
+    <a class="l" href="#limits">Limitations</a>
+    <a class="l" href="#roadmap">Roadmap</a>
+  </div>
+</nav>
+
+<header class="hero gut" id="top">
+  <div class="inner">
+    <div>
+      <span class="eyebrow">Smart India Hackathon 2026 · PS 26180 · Qualcomm · Hardware</span>
+      <h1>A field sentinel that knows <em>when it isn't sure.</em></h1>
+      <p class="lede">KisanNetra is a fixed, solar-powered pole for a paddy field in the Cauvery delta. It
+        photographs the crop, reads the soil and air, and decides <b>on the device, with no network</b>
+        whether there is disease, pest damage, a nutrient problem or a need to irrigate. When the
+        evidence is weak, it says so and looks again next cycle instead of guessing.</p>
+      <div class="idline"><span>Crop: rice (paddy)</span><span>Region: Thanjavur, Tamil Nadu</span><span>Target SoC: Qualcomm QCS6490</span></div>
+    </div>
+    <div class="facts" aria-label="Key results">
+      <div class="fact"><span class="fact__v">87.7%</span><span class="fact__k">disease accuracy, 5 classes<br>n = 1,000 held-out images</span></div>
+      <div class="fact"><span class="fact__v">95.0%</span><span class="fact__k">pest-damage accuracy, 3 classes<br>n = 717 held-out images</span></div>
+      <div class="fact"><span class="fact__v">8.4→3.0%</span><span class="fact__k">false pest alerts on healthy leaves, after the abstain threshold</span></div>
+      <div class="fact"><span class="fact__v">0</span><span class="fact__k">network calls needed for any decision, verified by test</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="problem" class="gut">
+  <div class="inner">
+    <div class="shead">
+      <span class="eyebrow">The problem</span>
+      <h2>Crop decisions are made late, far from the field, on a connection that isn't there</h2>
+    </div>
+    <div class="split plain">
+      <p class="lede">The problem statement asks for a field-deployable, AI-powered assistant that detects
+        disease, pests, nutrient deficiency and irrigation need early, running as <b>edge AI on the
+        device</b> and working <b>without continuous cloud access</b>.</p>
+      <ul>
+        <li><b>Where:</b> Thanjavur, Tamil Nadu's rice bowl. Smallholder plots with unreliable connectivity.</li>
+        <li><b>Who:</b> a farmer who will not stand in flooded paddy photographing leaves with a phone.</li>
+        <li><b>Constraint:</b> any design that needs a live network link for a critical decision has already failed the brief.</li>
+        <li><b>Our scope:</b> one crop done deeply rather than many crops done shallowly.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="idea" class="gut">
+  <div class="inner">
+    <div class="shead">
+      <span class="eyebrow">The idea</span>
+      <h2>Why a camera alone is not enough</h2>
+    </div>
+    <div class="split">
+      <p class="quote">A camera sees symptoms, not causes.</p>
+      <p class="lede">A yellowing paddy leaf looks the same whether the cause is nitrogen deficiency or
+        water stress, and early Brown Spot can pass for either. No larger vision model fixes that,
+        because the answer is not in the pixels. It is in the humidity history, the root-zone moisture
+        and the soil chemistry. So KisanNetra keeps vision and sensors as separate components, joined by
+        an <b>explainable rule layer</b> where every recommendation traces back to a measurement.</p>
+    </div>
+    <div class="rules">
+      <div class="rule">
+        <span class="tag tag--acc">Corroboration ceiling</span>
+        <h3>A confident camera reaches MEDIUM, never HIGH, on its own</h3>
+        <p>HIGH risk also needs the sensors to agree; Blast, for example, needs humidity ≥ 85% at 24–32 °C.
+          Tungro and Dead Heart are capped at MEDIUM by design, because their insect vectors are invisible
+          to every sensor on this node, and the advisory says so.</p>
+      </div>
+      <div class="rule">
+        <span class="tag tag--acc">Abstain</span>
+        <h3>An unclear frame is a delayed capture, not a missed detection</h3>
+        <p>Blurry frames are rejected before inference (sharpness score 2073 accepted; the same frame
+          blurred, 9.6, rejected). Low-confidence pest calls are re-imaged. That costs little because the
+          pole photographs the same plants every cycle.</p>
+      </div>
+      <div class="rule">
+        <span class="tag tag--acc">No guessing</span>
+        <h3>A failed sensor reads UNKNOWN, never zero</h3>
+        <p>A cut soil-probe wire must not become "0 mg/kg nitrogen, buy fertiliser". Dependent advice is
+          withheld and a manual check is requested. Automated tests prove a faulted probe cannot
+          escalate an alert.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="system" class="gut">
+  <div class="inner">
+    <div class="shead">
+      <span class="eyebrow">The system</span>
+      <h2>One fixed pole, two processors, soil probes at two depths</h2>
+      <p class="lede">The node does not move. Coverage grows by adding poles, which keeps the cost per plot
+        low. An always-on microcontroller watches the sensors; the AI processor is powered off until
+        there is something worth looking at.</p>
+    </div>
+    <div class="arch">
+      <figure class="figure">
+        <svg viewBox="0 0 360 420" role="img" aria-label="Sentinel pole: solar panel and camera with sun hood at the top, sealed electronics enclosure, and soil probes at 100 and 300 millimetres below ground">
+          <rect x="0" y="0" width="360" height="420" fill="var(--surface)"/>
+          <rect x="0" y="318" width="360" height="102" fill="var(--sunk)"/>
+          <line x1="0" y1="318" x2="360" y2="318" stroke="var(--ink-2)" stroke-width="1.5"/>
+          <line x1="150" y1="60" x2="150" y2="380" stroke="var(--ink-2)" stroke-width="6"/>
+          <rect x="120" y="36" width="92" height="12" rx="2" fill="var(--accent)" transform="rotate(-12 166 42)"/>
+          <rect x="112" y="72" width="44" height="28" rx="4" fill="var(--ink-2)"/>
+          <path d="M112 86 L64 124 L64 96 Z" fill="var(--accent)" opacity=".22"/>
+          <rect x="118" y="140" width="64" height="62" rx="6" fill="var(--accent)"/>
+          <text x="150" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--surface)">ESP32</text>
+          <text x="150" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--surface)">+ QCS6490</text>
+          <text x="150" y="194" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--surface)">+ LoRa</text>
+          <line x1="150" y1="330" x2="96" y2="330" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <rect x="90" y="318" width="8" height="30" fill="var(--ok)"/>
+          <rect x="66" y="318" width="8" height="74" fill="var(--ok)"/>
+          <g font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="var(--ink-2)">
+            <text x="214" y="40">Solar panel, 10–20 W</text>
+            <text x="214" y="90">Camera + sun hood,</text>
+            <text x="214" y="104">35° down at the canopy</text>
+            <text x="214" y="168">Sealed enclosure,</text>
+            <text x="214" y="182">LiFePO4 battery</text>
+            <text x="214" y="310">Ground level</text>
+            <text x="106" y="362">~100 mm surface</text>
+            <text x="82" y="406">~300 mm root zone + pH / EC</text>
+          </g>
+        </svg>
+        <figcaption>Two probe depths separate "the surface got wet" from "the roots can drink", which is the distinction irrigation advice depends on.</figcaption>
+      </figure>
+
+      <div class="flow">
+        <div class="tier">
+          <div class="tier__head"><h3>Sentinel tier (always on, milliwatts)</h3><span class="tag tag--mute">ESP32 + LoRa</span></div>
+          <ul>
+            <li>Reads soil moisture ×2, pH, EC, soil and air temperature, humidity, light, rain and tank level every 15 minutes</li>
+            <li>Keeps a rolling history, so it sees trends, not just snapshots</li>
+            <li>Wakes the AI tier when a stress threshold or drying trend is crossed, plus dawn and mid-morning captures</li>
+          </ul>
+        </div>
+        <div class="link">wake signal · sensor window over UART</div>
+        <div class="tier tier--edge">
+          <div class="tier__head"><h3>Compute tier (off by default)</h3><span class="tag tag--acc">Qualcomm QCS6490</span></div>
+          <ul>
+            <li>Captures a frame, applies the blur gate, then runs the disease and pest models (5.8 MB each)</li>
+            <li>Fuses the vision results with the sensor window and produces one advisory with its reasons</li>
+            <li>Queues results locally and syncs when a link exists, then powers down</li>
+          </ul>
+        </div>
+        <div class="link">advisory · display / SMS · optional cloud sync</div>
+        <div class="tier">
+          <div class="tier__head"><h3>Farmer</h3><span class="tag tag--mute">one trip per advisory</span></div>
+          <ul><li>Disease and pest verdicts are kept separate but delivered as a single message, because the farmer walks to the field once.</li></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="energy tscroll">
+      <table>
+        <caption>Why the AI processor is off by default (design estimate, not a measurement)</caption>
+        <thead><tr><th scope="col">Configuration</th><th scope="col" class="n">Energy / day</th><th scope="col">Hardware it implies</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">AI processor always on (~6 W)</th><td class="n">~144 Wh</td><td>60–80 W panel, ~300 Wh battery, guyed mast</td></tr>
+          <tr class="chosen"><th scope="row">Duty-cycled, 4 sessions × ~85 s</th><td class="n">~0.8 Wh</td><td>10–20 W panel, 40–50 Wh LiFePO4</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="results" class="gut">
+  <div class="inner">
+    <div class="shead">
+      <span class="eyebrow">Results</span>
+      <h2>Two models, measured on images they never trained on</h2>
+      <p class="lede">Both are MobileNetV3-Small, fine-tuned on Paddy Doctor field images from Tamil Nadu
+        (ADT45, Ponni and other local varieties) plus a lab-condition rice set. Every headline figure
+        carries a 95% Wilson confidence interval. Hover or focus a bar for its counts.</p>
+    </div>
+
+    <div class="charts">
+      <div class="card">
+        <div class="card__head">
+          <h3>Disease model: recall by class</h3>
+          <div class="headline"><span class="headline__v">87.7%</span><span class="headline__ci">overall · 95% CI 85.5–89.6 · macro-F1 0.86</span></div>
+        </div>
+        <div class="bars" role="list" aria-label="Disease model recall by class, percent of test images correctly identified">
+          <div class="bar" role="listitem" tabindex="0" data-v="85.8" data-n="91 of 106"><span class="bar__k">Bacterial Blight</span><span class="bar__t"><span class="bar__f"></span></span><span class="bar__v">85.8%</span></div>
+          <div class="bar" role="listitem" tabindex="0" data-v="88.7" data-n="258 of 291"><span class="bar__k">Blast</span><span class="bar__t"><span class="bar__f"></span></span><span class="bar__v">88.7%</span></div>
+          <div class="bar" role="listitem" tabindex="0" data-v="70.4" data-n="112 of 159"><span class="bar__k">Brown Spot</span><span class="bar__t"><span class="bar__f"></span></span><span class="bar__v">70.4%</span></div>
+          <div class="bar" role="listitem" tabindex="0" data-v="95.4" data-n="251 of 263"><span class="bar__k">Healthy</span><span class="bar__t"><span class="bar__f"></span></span><span class="bar__v">95.4%</span></div>
+          <div class="bar" role="listitem" tabindex="0" data-v="91.2" data-n="165 of 181"><span class="bar__k">Tungro</span><span class="bar__t"><span class="bar__f"></span></span><span class="bar__v">91.2%</span></div>
+          <div class="axis" aria-hidden="true"><span></span><span class="axis__s"><span style="left:0">0</span><span style="left:50%">50</span><span style="left:100%">100%</span></span><span></span></div>
+        </div>
+        <p class="small">Brown Spot is weakest; it is most often confused with Blast (22 images). That is exactly the case where soil corroboration matters most.</p>
+      </div>
+
+      <div class="card">
+        <div class="card__head">
+          <h3>Pest-damage model: recall by class</h3>
+          <div class="headline"><span class="headline__v">95.0%</span><span class="headline__ci">overall · 95% CI 93.1–96.4 · macro-F1 0.95</span></div>
+        </div>
+        <div class="bars" role="list" aria-label="Pest model recall by class, percent of test images correctly identified">
+          <div class="bar" role="listitem" tabindex="0" data-v="98.6" data-n="212 of 215"><span class="bar__k">Dead Heart</span><span class="bar__t"><span class="bar__f"></span></span><span class="bar__v">98.6%</span></div>
+          <div class="bar" role="listitem" tabindex="0" data-v="95.4" data-n="228 of 239"><span class="bar__k">Hispa</span><span class="bar__t"><span class="bar__f"></span></span><span class="bar__v">95.4%</span></div>
+          <div class="bar" role="listitem" tabindex="0" data-v="91.6" data-n="241 of 263"><span class="bar__k">No pest damage</span><span class="bar__t"><span class="bar__f"></span></span><span class="bar__v">91.6%</span></div>
+          <div class="axis" aria-hidden="true"><span></span><span class="axis__s"><span style="left:0">0</span><span style="left:50%">50</span><span style="left:100%">100%</span></span><span></span></div>
+        </div>
+        <p class="small">A separate model from the disease one: feeding scars and dead tillers are a different visual task from fungal lesions, and the two verdicts are never averaged.</p>
+      </div>
+    </div>
+
+    <div class="charts" style="margin-top:18px">
+      <div>
+        <h3 style="margin-bottom:10px">Choosing the pest alert threshold</h3>
+        <div class="tscroll">
+          <table>
+            <thead><tr><th scope="col" class="n">Threshold</th><th scope="col" class="n">False alerts on healthy</th><th scope="col" class="n">Pest recall</th><th scope="col" class="n">Re-imaged</th></tr></thead>
+            <tbody>
+              <tr><td class="n">none</td><td class="n">8.4%</td><td class="n">96.9%</td><td class="n">0%</td></tr>
+              <tr><td class="n">0.70</td><td class="n">5.3%</td><td class="n">93.4%</td><td class="n">6.6%</td></tr>
+              <tr class="chosen"><td class="n">0.80 (chosen)</td><td class="n">3.0%</td><td class="n">90.3%</td><td class="n">11.2%</td></tr>
+              <tr><td class="n">0.90</td><td class="n">0.8%</td><td class="n">83.7%</td><td class="n">18.8%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small" style="margin-top:8px">Without a threshold, one healthy leaf in twelve raises a false alert. At 0.80 that falls 2.75×, at the cost of 6.6 points of recall.</p>
+      </div>
+      <div>
+        <h3 style="margin-bottom:10px">Robustness (n = 400, same images perturbed)</h3>
+        <div class="tscroll">
+          <table>
+            <thead><tr><th scope="col">Condition</th><th scope="col" class="n">Accuracy</th><th scope="col" class="n">Change</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Clean</th><td class="n">86.8%</td><td class="n">–</td></tr>
+              <tr><th scope="row">Low brightness</th><td class="n">85.3%</td><td class="n">−1.5 pp</td></tr>
+              <tr><th scope="row">High contrast</th><td class="n">86.8%</td><td class="n">0</td></tr>
+              <tr><th scope="row">Rotated 10°</th><td class="n">86.8%</td><td class="n">0</td></tr>
+              <tr><th scope="row">Blur</th><td class="n">69.0%</td><td class="n">−17.8 pp</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small" style="margin-top:8px">Blur is the one real weakness, which is why the blur gate sits in front of the model.</p>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:22px"><b>How we checked our own numbers.</b> A separate script reloads each
+      exported ONNX model and its class list and reproduces the accuracy with independently written
+      preprocessing. 51 automated checks pass (23 fusion, 18 pest-fusion, 10 end-to-end). Our own audit
+      found 15 issues in our work, including a label swap that reported healthy plants as Tungro; it was
+      caught and fixed, and the audit is published in the repository.</p>
+  </div>
+</section>
+
+<section id="qualcomm" class="gut">
+  <div class="inner">
+    <div class="shead">
+      <span class="eyebrow">Qualcomm edge path · future integration</span>
+      <h2>Built for the QCS6490; Qualcomm integration is the next phase</h2>
+      <p class="lede">Everything above was measured in software on a laptop CPU (FP32 ONNX, 2.5 ms per
+        image; not a Qualcomm figure). The system is designed around the QCS6490 from the start, and
+        bringing it onto Qualcomm silicon is planned in the phases below.</p>
+    </div>
+    <div class="qc">
+      <div class="tscroll">
+        <table>
+          <thead><tr><th scope="col">Phase</th><th scope="col">Integration step</th><th scope="col">What it will prove</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">1</th><td>Compile and profile both models on QCS6490 through Qualcomm AI Hub</td><td>Latency, peak memory, share of layers on the Hexagon NPU</td></tr>
+            <tr><th scope="row">2</th><td>INT8 with Qualcomm's quantizer; quantization-aware training if needed</td><td>INT8 accuracy against the FP32 baseline</td></tr>
+            <tr><th scope="row">3</th><td>RB3 Gen 2 class board with the ESP32 sensor tier over UART</td><td>End-to-end on-device advisory and energy per capture session</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="plain">
+        <ul>
+          <li><b>Why this SoC:</b> an NPU for the vision workload, a Linux application processor for fusion and camera support, at a power level the duty cycle makes solar-viable.</li>
+          <li><b>Why an ESP32 beside it:</b> the QCS6490 exposes no user analog input, and capacitive soil probes are analog.</li>
+          <li><b>INT8:</b> standard onnxruntime post-training quantization collapsed accuracy on both models (22–36%). The cause is not yet isolated, so FP32 ships; Qualcomm's own quantizer is part of the integration phase.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="demos" class="gut">
+  <div class="inner">
+    <div class="shead">
+      <span class="eyebrow">Live pages</span>
+      <h2>See it working</h2>
+      <p class="lede">Three pages from the project, hosted with this site. Each opens here; use “Back to KisanNetra overview” at its top to return.</p>
+    </div>
+    <div class="demos">
+      <a class="demo" href="results.html">
+        <span class="tag tag--ok">Real model output</span>
+        <h3>Sentinel field panel</h3>
+        <p>Actual predictions from both models on held-out paddy images, the blur gate rejecting a frame,
+          the rule engine's advisory, and the evidence with confidence intervals.</p>
+        <span class="demo__go">Open results →</span>
+      </a>
+      <a class="demo" href="twin.html">
+        <span class="tag tag--mute">Simulation</span>
+        <h3>Digital twin, guided demo</h3>
+        <p>Three paddy zones through drought, disease, heavy rain, a cut internet link and a failed soil probe,
+          showing irrigation of one zone only and the node carrying on offline.</p>
+        <span class="demo__go">Open twin →</span>
+      </a>
+      <a class="demo" href="fusion.html">
+        <span class="tag tag--mute">Interactive principle</span>
+        <h3>Fusion explorer</h3>
+        <p>Hold one leaf image fixed, change the field history with sliders, and watch the soil data
+          overturn the camera's first guess, with every step traced to a reading.</p>
+        <span class="demo__go">Open explorer →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="limits" class="gut">
+  <div class="inner">
+    <div class="shead">
+      <span class="eyebrow">Limitations</span>
+      <h2>What we have not shown yet</h2>
+      <p class="lede">Stated here so you don't have to ask.</p>
+    </div>
+    <div>
+      <div class="limit"><span class="limit__m">!</span><p><b>No physical board yet.</b> Sensor values in every page are simulated by a generator with drift, noise and fault injection; the hardware is designed and modelled in CAD and in ESP32 firmware simulation.</p></div>
+      <div class="limit"><span class="limit__m">!</span><p><b>Camera angle not yet tested.</b> Training images are close-up leaves; the pole camera looks down at the canopy. The evaluation script is ready; field photographs at the mounting angle are the next thing we collect.</p></div>
+      <div class="limit"><span class="limit__m">!</span><p><b>About 5% near-duplicate images</b> between our training and test splits (measured by perceptual hashing), so headline accuracy is slightly optimistic. Re-reporting without them is under way.</p></div>
+      <div class="limit"><span class="limit__m">!</span><p><b>Nitrogen, phosphorus and potassium are estimates.</b> Low-cost soil probes infer them from conductivity, so the system flags a <i>possible</i> shortage and recommends a soil test; it never prescribes fertiliser.</p></div>
+      <div class="limit"><span class="limit__m">!</span><p><b>Coverage:</b> five rice diseases and two pest-damage types today. Brown planthopper and leaf folder are next.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap" class="gut">
+  <div class="inner">
+    <div class="shead">
+      <span class="eyebrow">Roadmap</span>
+      <h2>From validated software to a pole in a Thanjavur field</h2>
+    </div>
+    <div class="road">
+      <div class="step"><h3>Qualcomm integration</h3><p>Profile both models on QCS6490 through Qualcomm AI Hub; recover INT8 with Qualcomm's quantizer or quantization-aware training.</p></div>
+      <div class="step"><h3>Next round</h3><p>Build the physical node on an RB3 Gen 2 class board with the ESP32 sensor tier; collect canopy-angle images and measure accuracy on them.</p></div>
+      <div class="step"><h3>Season pilot</h3><p>One pole per zone on a cooperative's plots through a kuruvai or samba season; calibrate soil thresholds per field.</p></div>
+      <div class="step"><h3>Scale</h3><p>One compute node shared per cooperative with low-cost sensor nodes per plot; add brown planthopper and leaf folder detection.</p></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="gut">
+  <div class="inner">
+    <div>KisanNetra · Smart India Hackathon 2026 · Problem Statement 26180 (Qualcomm Inc.)</div>
+    <div>All accuracy figures are software-only validation on held-out test splits. No figure on this site is a Qualcomm NPU measurement; Qualcomm integration is a future phase.</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var tip = document.createElement("div");
+  tip.className = "tip"; tip.hidden = true; tip.setAttribute("role","tooltip");
+  document.body.appendChild(tip);
+
+  document.querySelectorAll(".bars .bar").forEach(function(bar){
+    var v = parseFloat(bar.dataset.v);
+    var t = bar.querySelector(".bar__t");
+    var name = bar.querySelector(".bar__k").textContent;
+    bar.querySelector(".bar__f").style.width = v + "%";
+    var g = document.createElement("span"); g.className = "grid-line"; g.style.left = "50%"; t.appendChild(g);
+    bar.setAttribute("aria-label", name + ": " + v + "% (" + bar.dataset.n + " test images correct)");
+
+    function show(){
+      tip.textContent = name + " · " + bar.dataset.n + " correct · " + v + "%";
+      tip.hidden = false;
+      var r = t.getBoundingClientRect();
+      var x = r.left + window.scrollX + r.width * v / 100;
+      var w = tip.offsetWidth;
+      var maxX = window.scrollX + document.documentElement.clientWidth - w - 8;
+      tip.style.left = Math.max(window.scrollX + 8, Math.min(x - w / 2, maxX)) + "px";
+      tip.style.top = (r.top + window.scrollY - tip.offsetHeight - 8) + "px";
+    }
+    function hide(){ tip.hidden = true; }
+    bar.addEventListener("mouseenter", show);
+    bar.addEventListener("mouseleave", hide);
+    bar.addEventListener("focus", show);
+    bar.addEventListener("blur", hide);
+  });
+})();
+</script>

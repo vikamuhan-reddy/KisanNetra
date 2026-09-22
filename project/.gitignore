@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Image splits - rebuilt by ai/step2_clean_split.py and ai/pest/pest_step2_clean_split.py (see README)
+ai/dataset_split/
+ai/pest/pest_dataset_split/
+
+# Qualcomm AI Hub intermediate models (static-shape copies)
+benchmarks/*_static.onnx
+
+# Generated CAD output - regenerate with the commands in hardware/cad/README.md
+*.stl
+*.3mf
+
+# OS
+Thumbs.db
+.DS_Store
