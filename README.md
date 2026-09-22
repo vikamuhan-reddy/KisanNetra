@@ -47,6 +47,70 @@ All figures are software-only validation on held-out test images (laptop CPU, FP
 
 ---
 
+## Data
+
+| Dataset | Used for | Images used | Conditions | Source |
+|---|---|---|---|---|
+| **Paddy Doctor** (Petchiammal et al., CODS-COMAD 2023) | Disease model (4 classes + Healthy) and pest model (Dead Heart, Hispa, No pest damage) | 5,981 disease-model + 4,767 pest-model images after de-duplication | **Field**: real paddy plots in Tamil Nadu; 10 varieties, ADT45 is 67% of the dataset | [Kaggle: paddy-disease-classification](https://www.kaggle.com/competitions/paddy-disease-classification) |
+| **Lab rice-leaf set** (`archive (3)`) | Disease model, lab-condition subset | 626 (Bacterial Blight, Blast, Brown Spot, Tungro) | **Lab**: single leaf, studio background | _TODO: source link_ |
+
+**Class mapping.** Paddy Doctor `bacterial_leaf_blight`, `blast`, `brown_spot`, `tungro`, `normal` → Bacterial Blight,
+Blast, Brown Spot, Tungro, Healthy. `dead_heart`, `hispa`, `normal` → the pest model. Not used yet: Paddy Doctor
+`bacterial_leaf_streak`, `bacterial_panicle_blight`, `downy_mildew`, and the lab set's `leaf_scald` (no field counterpart).
+
+**Splits.** Exact duplicates removed by MD5 (53 disease, 33 pest), then a 70 / 15 / 15 split **per class and per source**
+(fixed seed 42), so no image appears in two splits and lab and field images can be scored separately.
+
+| | Train | Validation | Test |
+|---|---|---|---|
+| Disease model | 4,621 | 986 | 1,000 (901 field + 99 lab) |
+| Pest model | 3,336 | 714 | 717 (all field) |
+
+Image splits are not stored in the repository; `ai/step2_clean_split.py` and `ai/pest/pest_step2_clean_split.py` rebuild them
+from the raw datasets. Split reports: `ai/split_report.json`, `ai/pest/pest_split_report.json`.
+
+**No image + sensor dataset exists** for Thanjavur paddy, so none was fabricated: vision and sensors are separate
+components joined by explainable rules, and every sensor value in this submission is simulated.
+
+---
+
+## Models, training and evaluation
+
+| | Disease model | Pest-damage model |
+|---|---|---|
+| Architecture | MobileNetV3-Small, ImageNet-1k pretrained | same |
+| Input | 224×224 RGB, ImageNet normalisation | same |
+| Augmentation (train only) | horizontal flip, rotation ±15°, colour jitter 0.2 | same |
+| Training | 1 epoch head-only (Adam, lr 1e-3), then 4 epochs full fine-tune (Adam, lr 1e-4); batch 64; cross-entropy; best validation checkpoint kept | same |
+| Hardware / time | NVIDIA RTX 5060 laptop GPU, ~6 min | ~3 min |
+| Deployment artifact | FP32 ONNX (opset 17), 5.8 MB | FP32 ONNX, 5.8 MB |
+| Class order | saved to `classes.json` at training time; never hard-coded | `pest_classes.json` |
+
+**Evaluation** (`ai/step4_evaluate.py`, `ai/model_validation_suite.py`): accuracy with 95% Wilson and bootstrap
+intervals, macro-F1, per-class recall, confusion matrix, expected calibration error (0.037), accuracy under blur,
+brightness, contrast and rotation, and an independent reproduction that reloads the exported ONNX file with
+separately written preprocessing. Pest alert threshold chosen from a sweep (`ai/pest/pest_threshold_analysis.py`).
+
+**Inference safeguards:** a variance-of-Laplacian blur gate (threshold 100) rejects frames before the model; visual
+confidence alone never produces a HIGH risk; a missing sensor is reported as UNKNOWN, never as zero.
+
+---
+
+## ML roadmap
+
+| Priority | Next step | Why |
+|---|---|---|
+| 1 | Qualcomm integration: compile and profile on QCS6490 via AI Hub; INT8 with Qualcomm's quantizer or quantization-aware training | Edge latency and NPU numbers; recover the INT8 accuracy lost with onnxruntime |
+| 2 | Collect 20–30 canopy-angle photos from the pole's mounting position and run `ai/ood_eval.py` | Training images are close-up leaves; the deployed camera is not |
+| 3 | Remove the ~5% near-duplicate test images (perceptual hash) and re-report; add a variety-held-out test | Remove optimism from the headline numbers; two-thirds of Paddy Doctor is a single variety (ADT45) |
+| 4 | Class weighting or focal loss, plus more Brown Spot data | Brown Spot recall is 70%, the weakest class, most often confused with Blast |
+| 5 | Confidence-threshold sweep for the disease model, as done for pests | Let the disease channel abstain on unfamiliar leaves |
+| 6 | Add bacterial leaf streak, downy mildew and panicle blight from Paddy Doctor | Diseases the current 5-class model would misclassify |
+| 7 | Brown planthopper and leaf folder detection (insect imagery; likely an object detector) | The most damaging Tamil Nadu pests are not yet covered |
+| 8 | Nutrient-deficiency leaf imagery; yield-risk model from Tamil Nadu district crop data | Complete the problem statement's nutrient and analytics goals |
+
+---
+
 ## What is in this folder
 
 ```
