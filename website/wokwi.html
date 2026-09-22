@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KisanNetra ESP32 Simulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,500;0,600;1,500&display=swap">
+<style>
+:root{
+  --ground:#F3F6F3; --surface:#FFFFFF; --surface-2:#EAF0EC; --sunk:#DFE7E2;
+  --ink:#15201B; --ink-2:#3C4D46; --muted:#667A72; --rule:#D2DCD6;
+  --accent:#1B6A5A; --accent-soft:#DAEBE5;
+  --ok:#3D7B38; --ok-bg:#E5EFE2; --warn:#93600F; --warn-bg:#F6EBD6; --crit:#A23535; --crit-bg:#F4E0DF;
+  --lcd-bg:#9BBF5A; --lcd-ink:#1E2A10;
+  --shadow:0 1px 2px rgba(21,32,27,.06),0 10px 26px -16px rgba(21,32,27,.25);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1412; --surface:#141D1A; --surface-2:#1A2622; --sunk:#1B2521;
+    --ink:#E2EAE6; --ink-2:#AEBFB8; --muted:#7C9089; --rule:#27352F;
+    --accent:#5CC2A9; --accent-soft:#11302A;
+    --ok:#6DBE62; --ok-bg:#162D18; --warn:#DFA640; --warn-bg:#31250E; --crit:#E3736D; --crit-bg:#321A19;
+    --lcd-bg:#6F8F3A; --lcd-ink:#0F160A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -16px rgba(0,0,0,.75);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1412; --surface:#141D1A; --surface-2:#1A2622; --sunk:#1B2521;
+  --ink:#E2EAE6; --ink-2:#AEBFB8; --muted:#7C9089; --rule:#27352F;
+  --accent:#5CC2A9; --accent-soft:#11302A;
+  --ok:#6DBE62; --ok-bg:#162D18; --warn:#DFA640; --warn-bg:#31250E; --crit:#E3736D; --crit-bg:#321A19;
+  --lcd-bg:#6F8F3A; --lcd-ink:#0F160A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -16px rgba(0,0,0,.75);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"IBM Plex Serif",Georgia,serif;margin:0;text-wrap:balance;font-weight:600}
+h1{font-size:clamp(1.9rem,4.6vw,2.8rem);line-height:1.1;letter-spacing:-.02em}
+h2{font-size:clamp(1.3rem,3vw,1.6rem)}
+h3{font-size:1rem}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:18px 64px}
+.back{display:inline-flex;gap:6px;align-items:center;padding:6px 12px;border:1px solid var(--rule);border-radius:4px;
+  background:var(--surface);color:var(--ink);text-decoration:none;font-size:.88rem;font-weight:500}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:500}
+.lede{color:var(--ink-2);max-width:68ch}
+.small{font-size:.86rem;color:var(--muted)}
+header{padding-block:26px 28px;border-bottom:1px solid var(--rule);display:grid;gap:26px;
+  grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:center}
+@media (max-width:860px){header{grid-template-columns:1fr}}
+.hgroup{display:flex;flex-direction:column;gap:12px}
+section{padding-block:44px 4px}
+.shead{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+
+.lcd{background:var(--lcd-bg);color:var(--lcd-ink);border-radius:6px;padding:14px 16px;box-shadow:var(--shadow);
+  border:6px solid var(--ink-2);font-family:"IBM Plex Mono",monospace;font-size:clamp(.78rem,2.4vw,1rem);line-height:1.5;
+  white-space:pre;overflow-x:auto;max-width:100%}
+.lcd-cap{font-size:.8rem;color:var(--muted);margin-top:8px}
+
+.run{display:grid;gap:18px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:var(--surface);
+  border:1px solid var(--accent);border-radius:4px;padding:20px;box-shadow:var(--shadow)}
+@media (max-width:760px){.run{grid-template-columns:1fr}}
+.run ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;color:var(--ink-2)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--ground);text-decoration:none;
+  font-weight:600;padding:10px 16px;border-radius:4px;align-self:flex-start}
+.files{display:flex;flex-wrap:wrap;gap:8px}
+.file{font-family:"IBM Plex Mono",monospace;font-size:.8rem;padding:4px 9px;border:1px solid var(--rule);border-radius:3px;
+  background:var(--surface-2);text-decoration:none;color:var(--ink)}
+
+.block{display:grid;gap:14px;grid-template-columns:minmax(0,1.1fr) minmax(0,.8fr) minmax(0,1fr);align-items:stretch}
+@media (max-width:860px){.block{grid-template-columns:1fr}}
+.col{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.col h3{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.mcu{border-color:var(--accent);background:var(--accent-soft);justify-content:center}
+.mcu .chip{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:1.05rem;color:var(--ink)}
+.mcu ul{margin:0;padding-left:1.1em;color:var(--ink-2);font-size:.9rem;display:flex;flex-direction:column;gap:3px}
+.io{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.io li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;font-size:.88rem;border-bottom:1px dashed var(--rule);padding-bottom:5px}
+.io li:last-child{border-bottom:0}
+.io .pin{font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--muted);white-space:nowrap}
+.io b{font-weight:600}
+.io span.real{display:block;color:var(--muted);font-size:.78rem}
+
+.tscroll{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+thead th{font-family:"IBM Plex Mono",monospace;font-size:.68rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);background:var(--surface-2);white-space:nowrap}
+tbody th{font-weight:500}
+.dec{font-family:"IBM Plex Mono",monospace;font-size:.76rem;font-weight:500;padding:2px 7px;border-radius:2px;white-space:nowrap}
+.d-ok{color:var(--ok);background:var(--ok-bg)}
+.d-act{color:var(--accent);background:var(--accent-soft)}
+.d-warn{color:var(--warn);background:var(--warn-bg)}
+.d-crit{color:var(--crit);background:var(--crit-bg)}
+.pass{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ok)}
+
+.two{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.box{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.box ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:5px;color:var(--ink-2);font-size:.92rem}
+.box b{color:var(--ink)}
+pre.code{margin:0;background:var(--surface-2);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;
+  font-family:"IBM Plex Mono",monospace;font-size:.8rem;overflow-x:auto;color:var(--ink)}
+.steps{counter-reset:s;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--rule);border-radius:4px}
+.step{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1.1fr);gap:12px;padding:11px 14px;border-bottom:1px solid var(--rule);font-size:.9rem}
+.step:last-child{border-bottom:0}
+.step::before{counter-increment:s;content:counter(s);font-family:"IBM Plex Mono",monospace;font-weight:500;color:var(--accent)}
+.step .see{color:var(--ink-2)}
+@media (max-width:620px){.step{grid-template-columns:28px minmax(0,1fr)}.step .see{grid-column:2}}
+.limits{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px;color:var(--ink-2)}
+.limits b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <a class="back" href="index.html">&larr; Back to KisanNetra overview</a>
+
+  <header>
+    <div class="hgroup">
+      <span class="eyebrow">ESP32 sensor tier · Wokwi simulation · MicroPython</span>
+      <h1>The always-on half of the sentinel, running as real firmware</h1>
+      <p class="lede">Before building hardware, we wrote and ran the firmware for the pole's low-power
+        microcontroller in the Wokwi ESP32 simulator: 12 sensor channels, a valve relay, a field display,
+        fault injection and a live MQTT link. It makes the irrigation and alert decisions itself and keeps
+        deciding with the network cut.</p>
+      <p class="small">23 parts · 58 wires · 12 sensor channels · 15 field scenarios tested · runs with no network</p>
+    </div>
+    <div>
+      <div class="lcd" role="img" aria-label="Field display showing an irrigate-now decision with its reasons">EDGE:OK CLOUD:DN
+----------------
+IRRIGATE NOW
+zone water stres
+----------------
+-Moisture 17% be
+-Trend -1.40 %/h
+-Air temp 32C</div>
+      <p class="lcd-cap">What the node's field display shows, mirrored from the firmware's serial output (16 columns, as on the real OLED).</p>
+    </div>
+  </header>
+
+  <section aria-labelledby="run-h">
+    <div class="shead">
+      <span class="eyebrow">Try it</span>
+      <h2 id="run-h">Run the simulation yourself</h2>
+    </div>
+    <div class="run">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <a class="btn" id="live" href="#" hidden>▶ Open live simulation on Wokwi</a>
+        <p class="lede" id="live-note">No installation needed: it runs in the browser on wokwi.com.</p>
+        <ol>
+          <li>Open <a href="https://wokwi.com" target="_blank" rel="noopener">wokwi.com</a> → <b>New Project</b> → <b>ESP32</b> → <b>MicroPython</b></li>
+          <li>Replace <code>diagram.json</code> with ours, and paste our <code>main.py</code></li>
+          <li>Press ▶. The display boots, and the serial monitor below the circuit reports every decision</li>
+        </ol>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <h3>Firmware files</h3>
+        <div class="files">
+          <a class="file" href="https://github.com/vikamuhan-reddy/KisanNetra/blob/main/project/iot/wokwi/micropython/diagram.json" target="_blank" rel="noopener">diagram.json</a>
+          <a class="file" href="https://github.com/vikamuhan-reddy/KisanNetra/blob/main/project/iot/wokwi/micropython/main.py" target="_blank" rel="noopener">main.py</a>
+          <a class="file" href="https://github.com/vikamuhan-reddy/KisanNetra/blob/main/project/iot/wokwi/README.md" target="_blank" rel="noopener">README</a>
+          <a class="file" href="https://github.com/vikamuhan-reddy/KisanNetra/blob/main/project/iot/wokwi/COMPONENTS.md" target="_blank" rel="noopener">parts guide</a>
+        </div>
+        <p class="small">An Arduino C++ variant with the same decision logic (6 channels, no networking) is in
+          <a href="https://github.com/vikamuhan-reddy/KisanNetra/tree/main/project/iot/wokwi/arduino" target="_blank" rel="noopener">iot/wokwi/arduino</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="circuit-h">
+    <div class="shead">
+      <span class="eyebrow">The circuit</span>
+      <h2 id="circuit-h">What is wired to the ESP32, and what each part stands for</h2>
+      <p class="lede">Wokwi has no soil probe, pH electrode or camera, so potentiometers stand in for those
+        analog sensors; the firmware reads them exactly as it would read the real probe's voltage.
+        Every analog input is on ADC1, because ADC2 pins stop working on the ESP32 while Wi-Fi is on.</p>
+    </div>
+    <div class="block">
+      <div class="col">
+        <h3>Inputs (12 channels)</h3>
+        <ul class="io">
+          <li><div><b>Root-zone moisture, 300 mm</b><span class="real">potentiometer → capacitive probe · drives irrigation</span></div><span class="pin">GPIO 35</span></li>
+          <li><div><b>Surface moisture, 100 mm</b><span class="real">potentiometer → capacitive probe</span></div><span class="pin">GPIO 34</span></li>
+          <li><div><b>Soil pH</b><span class="real">potentiometer → pH probe</span></div><span class="pin">GPIO 32</span></li>
+          <li><div><b>Soil EC</b><span class="real">potentiometer → EC probe (N indication derived)</span></div><span class="pin">GPIO 39</span></li>
+          <li><div><b>Vision disease confidence</b><span class="real">potentiometer or MQTT → result from the AI tier</span></div><span class="pin">GPIO 33</span></li>
+          <li><div><b>Air temperature + humidity</b><span class="real">DHT22 (real Wokwi part)</span></div><span class="pin">GPIO 15</span></li>
+          <li><div><b>Soil temperature</b><span class="real">DS18B20, 1-Wire (real part)</span></div><span class="pin">GPIO 14</span></li>
+          <li><div><b>Water-tank level</b><span class="real">HC-SR04 ultrasonic (real part)</span></div><span class="pin">GPIO 26/27</span></li>
+          <li><div><b>Light level</b><span class="real">photoresistor · camera image-quality gate</span></div><span class="pin">GPIO 36</span></li>
+          <li><div><b>RAIN · NET · FAULT</b><span class="real">buttons for rain, cutting the network, probe faults</span></div><span class="pin">GPIO 4/5/13</span></li>
+        </ul>
+      </div>
+      <div class="col mcu">
+        <h3>Microcontroller</h3>
+        <span class="chip">ESP32 DevKit v1</span>
+        <ul>
+          <li>Validates every reading; an impossible value is treated as a fault</li>
+          <li>Keeps a 24-reading history for trends</li>
+          <li>Scores water, disease, pest, nutrient and flood risk</li>
+          <li>Decides locally, then publishes over MQTT if a link exists</li>
+          <li>Queues up to 50 records while offline</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>Outputs</h3>
+        <ul class="io">
+          <li><div><b>Relay</b><span class="real">solenoid irrigation valve (the one controlled action)</span></div><span class="pin">GPIO 25</span></li>
+          <li><div><b>LEDs: VALVE · ALERT · EDGE</b><span class="real">EDGE heartbeat keeps blinking when the network is down</span></div><span class="pin">18/19/23</span></li>
+          <li><div><b>Buzzer</b><span class="real">chirps once per new alert, never continuously</span></div><span class="pin">GPIO 2</span></li>
+          <li><div><b>OLED 128×64</b><span class="real">field display, 5 rotating pages</span></div><span class="pin">I²C 0x3C</span></li>
+          <li><div><b>LCD 20×4</b><span class="real">large mirror of the display for demos</span></div><span class="pin">I²C 0x27</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="tests-h">
+    <div class="shead">
+      <span class="eyebrow">Verified behaviour</span>
+      <h2 id="tests-h">15 field situations, 15 correct decisions</h2>
+      <p class="lede">The firmware's decision logic is pure Python, so a test harness runs the same
+        <code>main.py</code> on a PC through 15 field states. A second check confirms the code uses nothing
+        MicroPython on the ESP32 lacks. Both pass. The harness has already caught one real bug: a waterlogged,
+        rainy field was once reported as "all signals normal".</p>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th scope="col">Field situation</th><th scope="col">Decision</th><th scope="col">Why</th><th scope="col">Test</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Healthy field</th><td><span class="dec d-ok">NO ACTION</span></td><td>All signals normal</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Dry root zone</th><td><span class="dec d-act">IRRIGATE NOW</span></td><td>Root-zone moisture below 20%</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Dry, tank nearly empty</th><td><span class="dec d-warn">TANK REFILL</span></td><td>Tank below 15%, valve held shut to protect the pump</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Dry, but rain arrived</th><td><span class="dec d-ok">DELAY IRRIGATION</span></td><td>Rain is supplying the crop</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Light shower on dry soil</th><td><span class="dec d-ok">NO ACTION</span></td><td>Rain on dry ground is good news, not a hazard</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Waterlogged field</th><td><span class="dec d-warn">WATERLOGGING</span></td><td>Root zone above 45%, drainage check advised</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Over-irrigated, no rain</th><td><span class="dec d-warn">WATERLOGGING</span></td><td>Decided by the soil, not the weather</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Saline but moist soil</th><td><span class="dec d-warn">SALINITY CHECK</span></td><td>High EC: wilting from salt stress, not drought</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">pH outside 5.6–7.8</th><td><span class="dec d-warn">SOIL TEST</span></td><td>Nutrients may be locked out; no fertiliser prescribed</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Heat wave (44 °C)</th><td><span class="dec d-warn">HEAT STRESS</span></td><td>Above the 38 °C threshold</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Disease evidence + humid air</th><td><span class="dec d-crit">INSPECT ZONE</span></td><td>Camera evidence corroborated by humidity; advisory only</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Same evidence, dark frame</th><td><span class="dec d-ok">NO ACTION</span></td><td>Below 120 lux the image is not trusted</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Soil probe failed</th><td><span class="dec d-crit">MANUAL CHECK</span></td><td>No value substituted; confidence drops</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Soil probe stuck</th><td><span class="dec d-crit">MANUAL CHECK</span></td><td>Readings stopped changing, so the probe is flagged for service</td><td class="pass">PASS</td></tr>
+          <tr><th scope="row">Tank sensor lost</th><td><span class="dec d-crit">MANUAL CHECK</span></td><td>Supply unverifiable, so the valve stays shut</td><td class="pass">PASS</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="camera-h">
+    <div class="shead">
+      <span class="eyebrow">One design rule, as arithmetic</span>
+      <h2 id="camera-h">The camera cannot raise an alarm on its own</h2>
+      <p class="lede">Disease risk from vision is confidence × 55, and the alert threshold is 60. Even a 100%
+        confident camera reaches only 55. The alert needs the air to agree:</p>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th scope="col">Conditions measured by the node</th><th scope="col">Camera confidence needed for INSPECT ZONE</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Humidity above 80% and temperature 26–34 °C</th><td class="mono">0.48</td></tr>
+          <tr><th scope="row">Humidity above 80% only</th><td class="mono">0.70</td></tr>
+          <tr><th scope="row">Temperature in band only</th><td class="mono">0.88</td></tr>
+          <tr><th scope="row">Neither</th><td class="mono">not reachable, capped at 55</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="demo-h">
+    <div class="shead">
+      <span class="eyebrow">90-second walkthrough</span>
+      <h2 id="demo-h">What to do in the simulator, and what happens</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><span>Let it run</span><span class="see">The display cycles five pages; the green EDGE heartbeat blinks.</span></div>
+      <div class="step"><span>Turn the <b>root-moisture</b> knob (2nd from left) below 20%</span><span class="see"><b>IRRIGATE NOW</b>: the relay closes and the VALVE LED lights, with the reasons listed.</span></div>
+      <div class="step"><span>Click the <b>HC-SR04</b> and set distance past ~43 cm</span><span class="see"><b>TANK REFILL</b>: the valve shuts rather than run the pump dry.</span></div>
+      <div class="step"><span>Restore the tank, press <b>RAIN</b></span><span class="see"><b>DELAY IRRIGATION</b>: it won't irrigate while rain is falling.</span></div>
+      <div class="step"><span>Press <b>NET</b></span><span class="see">Display shows <code>CLOUD:DN</code>, records queue, and decisions carry on. Press again to replay the queue.</span></div>
+      <div class="step"><span>Press <b>FAULT</b> once, then again</span><span class="see">Stuck probe, then failed probe: <b>MANUAL CHECK</b> both times, and no value is ever made up.</span></div>
+      <div class="step"><span>Set <b>DHT22</b> humidity above 80%, turn the <b>vision</b> knob (far right) past ~0.5</span><span class="see"><b>INSPECT ZONE</b>: disease corroborated by humidity. Darken the light sensor and the alert drops.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="net-h">
+    <div class="shead">
+      <span class="eyebrow">Connectivity</span>
+      <h2 id="net-h">Decides first, talks second</h2>
+    </div>
+    <div class="two">
+      <div class="box">
+        <ul>
+          <li><b>The first decision is made and displayed before the radio is touched.</b> An earlier version waited ~12 s for Wi-Fi first; that was fixed.</li>
+          <li>Wi-Fi has an 8-second timeout and retries every 30 s; if it never comes up, the node runs anyway.</li>
+          <li>Offline records queue locally, capped at 50 (oldest dropped first, as real storage would).</li>
+          <li>The AI tier's result arrives on one interface: a potentiometer in the demo, MQTT here, UART on the real board.</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>MQTT topics (public HiveMQ demo broker)</h3>
+        <pre class="code">sih26180/sentinel-01/telemetry   → sensor state, faults, trend
+sih26180/sentinel-01/decision    → advisory, reasons, risks, valve
+sih26180/sentinel-01/vision      ← AI result, e.g.
+                                   {"disease": 0.85, "pests": 6}</pre>
+        <p class="small">A public, unauthenticated broker is fine for a demo; a deployed fleet needs per-device credentials and TLS.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="lim-h">
+    <div class="shead">
+      <span class="eyebrow">Limits</span>
+      <h2 id="lim-h">What this simulation is not</h2>
+    </div>
+    <ul class="limits">
+      <li><b>Not field measurements.</b> Readings come from knobs and clickable sensor parts; sensor drift and calibration error are not modelled.</li>
+      <li><b>No vision runs on the ESP32.</b> Disease confidence is an input, as it will arrive from the Qualcomm QCS6490 tier over UART.</li>
+      <li><b>Not Qualcomm hardware.</b> This is the low-power ESP32 tier; Qualcomm integration is the next phase.</li>
+      <li><b>N/P/K are derived from EC</b>, exactly as low-cost "NPK sensors" do, labelled as a proxy, and never used to prescribe fertiliser.</li>
+      <li><b>Water flow is modelled in firmware</b>; Wokwi has no flow-meter part. Thresholds are general starting points, not calibrated field constants.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+(function(){
+  // Set this to the public Wokwi project link (wokwi.com/projects/...) once it is saved.
+  var WOKWI_URL = "";
+  if (WOKWI_URL) {
+    var a = document.getElementById("live");
+    a.href = WOKWI_URL; a.target = "_blank"; a.rel = "noopener"; a.hidden = false;
+    document.getElementById("live-note").textContent = "Opens our saved project on wokwi.com. Press ▶ to start it. No installation needed.";
+  }
+})();
+</script>

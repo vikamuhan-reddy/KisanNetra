@@ -23,6 +23,7 @@ problem or a need to irrigate — and says so honestly when the evidence is too 
 | See real model predictions on held-out images | [`website/results.html`](website/results.html) |
 | Watch the guided system demo (drought, disease, rain, offline, sensor failure) | [`website/twin.html`](website/twin.html) |
 | Try the sensor-fusion idea yourself | [`website/fusion.html`](website/fusion.html) |
+| See the ESP32 firmware simulation (Wokwi): circuit, 15 tested scenarios, how to run it | [`website/wokwi.html`](website/wokwi.html) |
 | Read the full technical walkthrough | [`project/PROJECT_EXPLAINED.md`](project/PROJECT_EXPLAINED.md) |
 | Run the code | [How to run](#how-to-run) below |
 
@@ -51,7 +52,8 @@ All figures are software-only validation on held-out test images (laptop CPU, FP
 ```
 KisanNetra_SIH_Submission/
 ├── README.md                 this file
-├── website/                  judge-facing site (open index.html; no internet or server needed)
+├── website/                  judge-facing site (open index.html; no server needed): overview,
+│                             results, digital twin, fusion explorer, Wokwi simulation
 ├── samples/                  5 held-out test images per class, for trying the dashboard
 │   ├── disease/              Bacterial Blight, Blast, Brown Spot, Healthy, Tungro
 │   └── pest/                 Dead Heart, Hispa, No Pest Damage
