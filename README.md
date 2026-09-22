@@ -141,21 +141,33 @@ KisanNetra_SIH_Submission/
 
 ## How to run
 
-Requires Python 3.10+ (developed on 3.12). All commands run from the `project/` folder.
+Requires Python 3.10+ (developed on 3.12). Runs on **Windows, Linux and macOS** — the code contains
+no platform-specific calls. Verified on Windows 11 and on Ubuntu 24.04 (Python 3.12.3), where the
+models produce identical predictions. All commands run from the `project/` folder.
 
 ```bash
 cd project
-python -m venv .venv
-.venv/Scripts/activate          # Windows   (macOS/Linux: source .venv/bin/activate)
+
+# Linux / macOS
+python3 -m venv .venv && source .venv/bin/activate
+
+# Windows
+python -m venv .venv && .venv\Scripts\activate
+
 pip install -r requirements.txt
 ```
 
-**Run the checks**
+On Debian/Ubuntu, `python3 -m venv` first needs `sudo apt install python3-venv`. PyTorch is only
+required for retraining; running the models, the rules, the tests and the demo needs just
+`onnxruntime`, `numpy`, `Pillow` and `pytest`.
+
+**Run the checks** (use `python3` on Linux/macOS if `python` is not on your PATH)
 
 ```bash
 python -m pytest tests/ -q               # 23 fusion-engine tests
 python ai/pest/test_pest_fusion.py       # 18 pest-fusion tests
 python -m demo.differential_demo         # sensors overturning an ambiguous camera reading
+python iot/wokwi/micropython/test_firmware.py iot/wokwi/micropython/main.py   # 15 field scenarios
 ```
 
 **Live disease prediction with the dashboard**
