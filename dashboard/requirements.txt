@@ -1,0 +1,11 @@
+# KisanNetra inference dashboard. Python 3.12 (project/ai/inference_server.py
+# imports `cgi`, which Python 3.13+ removed).
+fastapi>=0.110
+uvicorn>=0.30
+python-multipart>=0.0.9
+onnxruntime>=1.18.0
+numpy>=1.24.0
+Pillow>=10.0.0
+# tests
+pytest>=8.0.0
+httpx>=0.27
