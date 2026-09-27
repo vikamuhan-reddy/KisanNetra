@@ -15,6 +15,19 @@ K_LOW         = 25           # mg/kg
 SURFACE_MOIST_LOW  = 22.0   # % — below this → irrigate risk
 ROOT_MOIST_LOW     = 16.0   # % — below this → irrigation urgent
 TANK_LEVEL_CRITICAL = 20.0  # % — below this → block irrigation
+
+# ── AWD (Alternate Wetting and Drying) water depth ──────────────────────────
+# Thanjavur paddy is grown under standing water for much of the season, so
+# capacitive probes at 100/300 mm read saturated and carry no irrigation signal.
+# The variable that actually drives the decision is how far the water has drawn
+# down below the soil surface, measured in a perforated field tube.
+#
+# ponytail: threshold is a placeholder pending a named TNAU/KVK source.
+# ~15 cm is the commonly cited AWD figure but is NOT verified for Thanjavur.
+# It is a config knob precisely because it needs local calibration.
+AWD_REFLOOD_DEPTH_CM = -15.0  # cm vs surface; at or below this → re-flood
+AWD_TUBE_FLOOR_CM    = -25.0  # tube perforation depth; below this the field is
+                              # genuinely drained and the soil probes govern
 LIGHT_LOW     = 400          # lux — poor image quality below this
 
 DISEASE_CLASSES = ["Bacterial Blight", "Blast", "Brown Spot", "Tungro", "Healthy"]
@@ -157,9 +170,45 @@ def evaluate_irrigation(sensor: dict) -> dict:
         result["reason"].append(f"Tank level {tank:.0f}% is critically low (<{TANK_LEVEL_CRITICAL}%) — irrigation BLOCKED.")
         return result
 
-    # Moisture-based decision
+    # ── AWD water depth governs whenever the tube is reading ────────────────
+    # Under standing water the soil probes are saturated and say nothing, so
+    # water depth is the primary signal. The probes are consulted only when the
+    # tube shows the field is genuinely drained, or when the tube has failed.
+    depth = _reading(sensor, "water_depth_cm")
+
+    if depth is not None and depth > AWD_TUBE_FLOOR_CM:
+        if depth <= AWD_REFLOOD_DEPTH_CM:
+            result["action"] = "IRRIGATE"
+            result["reason"].append(
+                f"Water drawn down to {depth:.1f} cm below surface "
+                f"(AWD re-flood threshold {AWD_REFLOOD_DEPTH_CM:.0f} cm) — re-flood now.")
+        elif depth >= 0:
+            result["reason"].append(
+                f"Standing water {depth:.1f} cm above surface — irrigation not needed.")
+        else:
+            result["reason"].append(
+                f"Water {abs(depth):.1f} cm below surface, above the "
+                f"{abs(AWD_REFLOOD_DEPTH_CM):.0f} cm re-flood threshold — "
+                f"AWD drawdown proceeding as intended.")
+
+        flow = _reading(sensor, "flow_lpm")
+        if result["action"] == "IRRIGATE" and (flow is None or flow < 0.5):
+            result["flow_alert"] = "Valve commanded but flow_lpm<0.5 or missing — possible blockage. VERIFY MANUALLY."
+        return result
+
+    # ── Drained field, or failed tube: soil moisture governs ────────────────
     surf = _reading(sensor, "surface_moisture")
     root = _reading(sensor, "root_moisture")
+
+    if depth is None:
+        result["confidence"] = "LOW"
+        result["reason"].append(
+            "Water-depth sensor FAILED — falling back to soil moisture, which is "
+            "unreliable under standing water. MANUAL CHECK RECOMMENDED.")
+    else:
+        result["reason"].append(
+            f"Tube dry below {abs(AWD_TUBE_FLOOR_CM):.0f} cm — field is drained; "
+            f"soil moisture governs at this stage.")
 
     if surf is None or root is None:
         result["confidence"] = "LOW"

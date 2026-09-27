@@ -23,21 +23,29 @@ class SensorDataGenerator:
             "root_moisture": 24.0,
             "tank_level": 80.0,
             "flow_lpm": 0.0,
-            "light_lux": 1000.0
+            "light_lux": 1000.0,
+            # Standing water in the AWD tube, cm relative to the soil surface.
+            # Positive = flooded above surface; negative = drawn down below it.
+            "water_depth_cm": 3.0
         }
         self.drift = {
             "surface_moisture": -0.45,
             "root_moisture": -0.25,
-            "tank_level": -2.0
+            "tank_level": -2.0,
+            "water_depth_cm": -1.2
         }
         self.noise = {
             "surface_moisture": 0.1,
             "root_moisture": 0.05,
-            "tank_level": 0.5
+            "tank_level": 0.5,
+            "water_depth_cm": 0.15
         }
         self.floor = {k: 0.0 for k in self.state}
         self.ceil = {k: 1500.0 for k in self.state}
         self.ceil.update({"surface_moisture": 100, "root_moisture": 100, "tank_level": 100})
+        # The tube only reads down to its perforated depth; below that it is dry.
+        self.floor["water_depth_cm"] = -30.0
+        self.ceil["water_depth_cm"] = 10.0
         self.raining = False
         
     def step(self):
@@ -50,6 +58,7 @@ class SensorDataGenerator:
         if self.raining:
             self.state["surface_moisture"] += 6.0
             self.state["tank_level"] += 5.0
+            self.state["water_depth_cm"] += 4.0
             
     @classmethod
     def generate_mock_reading(cls, faults=None, drop=None) -> dict:
@@ -67,7 +76,8 @@ class SensorDataGenerator:
                 "soil_npk": "VALID",
                 "surface_moisture": "VALID",
                 "root_moisture": "VALID",
-                "tank_level": "VALID"
+                "tank_level": "VALID",
+                "water_depth_cm": "VALID"
             }
         }
         for k, v in cls._instance.state.items():
