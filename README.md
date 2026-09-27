@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | **Team name** | Digital Disruptors |
-| **Team ID** | SIH178 |
+| **Team ID** | 159628 |
 | **Institute** | Saveetha Engineering College |
 | **Current stage** | Hardware validation + AI inference — see [`PROGRESS_REPORT.md`](PROGRESS_REPORT.md) |
 
