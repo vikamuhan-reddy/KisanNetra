@@ -5,9 +5,10 @@
 
 | | |
 |---|---|
-| **Team name** | _TODO_ |
-| **Team ID** | _TODO_ |
-| **Institute** | _TODO_ |
+| **Team name** | Digital Disruptors |
+| **Team ID** | SIH178 |
+| **Institute** | Saveetha Engineering College |
+| **Current stage** | Hardware validation + AI inference — see [`PROGRESS_REPORT.md`](PROGRESS_REPORT.md) |
 
 A fixed, solar-powered pole for a paddy field that photographs the crop, reads the soil and air,
 and decides **on the device, with no network** whether there is disease, pest damage, a nutrient
@@ -26,6 +27,10 @@ problem or a need to irrigate — and says so honestly when the evidence is too 
 | See the ESP32 firmware simulation (Wokwi): circuit, 15 tested scenarios, how to run it | [`website/wokwi.html`](website/wokwi.html) |
 | Read the full technical walkthrough | [`project/PROJECT_EXPLAINED.md`](project/PROJECT_EXPLAINED.md) |
 | Get every verified fact in one place (for slides, scripts, Q&A prep) | [`PROJECT_MASTER.md`](PROJECT_MASTER.md) |
+| **See the latest progress (hardware bench tests + AI dashboard)** | [`PROGRESS_REPORT.md`](PROGRESS_REPORT.md) |
+| Run the real disease and pest models on your own leaf photo | [`dashboard/`](dashboard/README.md) — local web dashboard |
+| Wire and test the sensors on an Arduino UNO | [`project/hardware/arduino/SENSOR_SETUP.md`](project/hardware/arduino/SENSOR_SETUP.md) |
+| Follow the data end to end (sensor → JSON → AI → fusion → edge cases) | [`END_TO_END_MASTER.md`](END_TO_END_MASTER.md) |
 | Run the code | [How to run](#how-to-run) below |
 
 ---

@@ -23,7 +23,7 @@ Everything here is taken from the code, the artifacts it produced, or checks re-
 | Problem statement | 26180, Qualcomm Inc., category **Hardware** |
 | Theme | Agriculture, FoodTech & Rural Development |
 | Crop and place | Rice (paddy), Thanjavur, Cauvery delta, Tamil Nadu |
-| Team name / ID / institute | _TODO — fill in_ |
+| Team name / ID / institute | Digital Disruptors / SIH178 / Saveetha Engineering College |
 | Repository | https://github.com/vikamuhan-reddy/KisanNetra |
 | Judge website | https://claude.ai/artifact/LJesDxdNKpFj1Ts32RqQxN (public link) |
 | GitHub Pages (if enabled) | https://vikamuhan-reddy.github.io/KisanNetra/website/ |
@@ -242,8 +242,9 @@ states why in its own output.
 
 | Quantity | Threshold |
 |---|---|
-| Surface moisture | irrigate below 22% |
-| Root-zone moisture | urgent below 16%; firmware: stress 20%, adequate 28%, waterlogged 45% |
+| **AWD water depth** | **re-flood at 15 cm below surface** (`AWD_REFLOOD_DEPTH_CM`); tube floor 25 cm. **Primary irrigation signal** — see note below |
+| Surface moisture | irrigate below 22% — **drained stages only** |
+| Root-zone moisture | urgent below 16% — **drained stages only**; firmware: stress 20%, adequate 28%, waterlogged 45% |
 | Soil pH | optimal 5.5–7.0 (firmware flags outside 5.6–7.8) |
 | Soil EC | salinity above 2.0 dS/m (firmware 3.0) |
 | N / P / K | 30–60 / >12 / >25 mg/kg — **EC-derived proxies, soil test advised, never a prescription** |
@@ -254,6 +255,22 @@ states why in its own output.
 
 **Ordering matters:** supply outranks crop stress. Below the critical tank level the valve stays
 shut however thirsty the crop is — a pump run dry destroys itself in minutes.
+
+**Why water depth, not soil moisture.** Thanjavur paddy is grown under standing water for most
+of the season, so capacitive probes at 100 and 300 mm sit at saturation and carry no irrigation
+signal — the 22% and 16% thresholds above would never fire. The actionable variable is how far
+the water has drawn down below the surface, measured in a perforated AWD (Alternate Wetting and
+Drying) tube. `evaluate_irrigation()` therefore runs on water depth whenever the tube is
+reading, and falls back to the soil probes only when the tube shows the field is genuinely
+drained, or when the tube has failed. See `ai/test_awd_irrigation.py` (8 tests).
+
+> The 15 cm figure is the commonly cited AWD threshold and is **not yet verified for the
+> Cauvery delta**. It is a calibration parameter, flagged as such in the source. An enquiry to
+> TRRI Aduthurai is outstanding.
+
+> **Known divergence:** the ESP32 firmware (`iot/wokwi/`) still implements the moisture-only
+> policy. The Python rule engine and the firmware are two expressions of one decision policy and
+> they currently disagree on irrigation. The firmware is the next thing to bring in line.
 
 ---
 
@@ -382,6 +399,10 @@ One advisory per capture cycle, naming the reasons: for example "Disease: Bacter
 | Models | `project/ai/kisannetra_fp32.onnx`, `project/ai/pest/kisannetra_pest_fp32.onnx` |
 | Metrics files | `ai/eval_metrics.json`, `ai/validation_report.json`, `ai/pest/pest_eval_metrics.json`, `ai/pest/pest_threshold_analysis.json` |
 | Full walkthrough | `project/PROJECT_EXPLAINED.md` |
+| End-to-end data flow + edge cases (video script source) | `END_TO_END_MASTER.md` |
+| Progress report (bench hardware + AI dashboard) | `PROGRESS_REPORT.md` |
+| AI inference dashboard | `dashboard/` |
+| Arduino sensor wiring and test sketches | `project/hardware/arduino/SENSOR_SETUP.md` |
 | Demo script and prepared answers | `project/docs/18_demo_script.md` |
 | Sensor reference (physics of each sensor) | `project/docs/23_sensing_reference.md` |
 | Power budget | `project/docs/22_power_autonomy.md` |
