@@ -213,4 +213,7 @@ image set. Place them in a folder, set `KISANNETRA_DATA` to that folder, then ru
 
 ---
 
+## Resources 
+For more details -> https://drive.google.com/drive/folders/1gJ2DUQR7kkJ53OTC-Ihe1k3goQsfXe-s?usp=drive_link 
+
 *Datasets are public and credited to their authors. Paddy Doctor field images were collected in Tamil Nadu.*
